@@ -1,0 +1,4 @@
+[core]
+    remote = data
+['remote "data"']
+    url = /Users/danbonan/Desktop/ALFRED/ALFRED_PROJECT/Model_YoloV5/runs
