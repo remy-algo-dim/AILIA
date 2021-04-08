@@ -1,6 +1,21 @@
 import argparse
 import time
 from pathlib import Path
+import glob
+import os
+import pickle
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import metrics
+import sklearn.model_selection as sms
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+from spacy.lang.fr import French
+from sklearn.naive_bayes import MultinomialNB
+from sklearn import metrics
+import pandas as pd
+
 
 import cv2
 import torch
@@ -17,16 +32,18 @@ import pytesseract
 import numpy as np
 import matplotlib.pyplot as plt
 from pdf2image import convert_from_path, convert_from_bytes
-import os
 
-cv_pdf = '/Users/danbonan/PycharmProjects/pythonProject/venv/0_CV-Jessica_raphael-2020.pdf'
 
+nlp_model = 'model_block_classification.pkl'
+vectorizer_model = 'vectorizer_block_classification.pkl'
+selector_model = 'selector_block_classification.pkl'
 
 def detect(source, img_size=640, conf_thres=0.25, iou_thres=0.45, device='cpu',
            weights='runs/train/exp_bloc/weights/last.pt', view_img=False, save_txt=True, save_conf=False,
            classes=None, agnostic_nms=False, augment=False, update=False, project='runs/detect', name='exp',
            exist_ok=False, save_img=False):
-
+    """Input:The converted pdf to image, the weights
+    Output:The detected Bloc on the image and also the labels of the predicted coordinates"""
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://'))
 
@@ -156,6 +173,8 @@ def detect(source, img_size=640, conf_thres=0.25, iou_thres=0.45, device='cpu',
 
 
 def get_coordinate(label, width, height):
+    """Input:The label, width and height of the image
+    Output: The coordinates of the image"""
     x_c, y_c, w, h = label[0], label[1], label[2], label[3]
     
     x_min = 2 * width * x_c - (width/2)*(2*x_c + w)
@@ -168,6 +187,8 @@ def get_coordinate(label, width, height):
 
 
 def tesseract_gars_sur(img):
+    """Input:The converted pdf to image
+    Output: The cutting bloc of the image"""
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     gray, img_bin = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     gray = cv2.bitwise_not(img_bin)
@@ -181,6 +202,8 @@ def tesseract_gars_sur(img):
 
 
 def bloc(labels, images):
+    """Input: The convert pdf into image and the predicted labels
+    Output: A dictionnary with all the predicted bloc"""
     with open(labels, 'r') as f:
         labels = f.read()
     labels = [l.split(' ') for l in labels.split("""\n""")]
@@ -199,11 +222,37 @@ def bloc(labels, images):
         
     return bloc_dict
 
+def new_predict(model, sample, vectorizer, selector):
+    """Input: model (pkl file), string text, vectorizer and selector (2 methods returned by training
+    for preprocessing)
+       Output: prediction (block label)"""
+    new_sample = pd.Series(sample)
+    sample_preprocessed = vectorizer.transform(new_sample)
+    sample_preprocessed = selector.transform(sample_preprocessed)
+    prediction = model.predict(sample_preprocessed)
+    return prediction
+
 
 if __name__ == "__main__":
     cv_pdf = input('PDF :')
     pages = convert_from_path(cv_pdf, 500)
     for page in pages:
         image = page.save(cv_pdf[:-4] + '.jpg', 'JPEG')
-    directory = detect(image)
-    bloc(str(directory)+'/labels/'+(image.split('/')[-1:])[0][:-4]+'.txt', image)
+
+    image_path = glob.glob("*.jpg")[0]
+
+    directory = detect(image_path)
+
+    for file in glob.glob(str(directory)+'/labels/*.txt'):
+        labels = file
+
+    final_dict = bloc(labels, image_path)
+    print(final_dict)
+
+    nlp_model_loaded = pickle.load(open(nlp_model, 'rb'))
+    vectorizer_model_loaded = pickle.load(open(vectorizer_model, 'rb'))
+    selector_model_loaded = pickle.load(open(selector_model, 'rb'))
+
+    for key in final_dict:
+        prediction = new_predict(nlp_model_loaded, pd.Series(final_dict[key]), vectorizer_model_loaded, selector_model_loaded)
+        print(prediction)

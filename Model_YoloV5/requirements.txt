@@ -29,3 +29,5 @@ pandas
 thop  # FLOPS computation
 pycocotools>=2.0  # COCO mAP
 pdf2images
+pytesseract
+sklearn
