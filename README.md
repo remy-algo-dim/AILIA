@@ -27,4 +27,6 @@ Fichier Python qui effectue les 3 premières étapes du produit : - PDF to JPG
 
 ## Model NER
 
-Dans Model_NER_3.py on a un script permettant de print des metrics pertinentes du NER
+Pré recquis : Train and save un modèle de NER.
+
+Dans Model_NER_3.py on a un script permettant de print des metrics pertinentes du NER (attention, il se peut qu'avec des versions différentes de spacy on il soit impossible de run ce script)

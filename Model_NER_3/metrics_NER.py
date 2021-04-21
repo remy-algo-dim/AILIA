@@ -16,6 +16,12 @@ from spacy.training import Example
 import numpy as np
 
 
+""" Python script permettant de print les metrics du NER.
+cmd : python metrics_NER.py  ---> 2 inputs : "path jsonl labelisé via Doccano" & "path modele NER en question"
+							 ---> outputs : metrics printed sur le terminal
+"""
+
+
 def read_jsonl(path_json_file):
     with open(path_json_file, 'r') as json_file:
         json_list = list(json_file)
