@@ -1,0 +1,5 @@
+SERVER = 'outlook.office365.com'
+USER = ""
+PASSWORD = ""
+SAVED_DIRECTORY = "FILES_DOWNLOADED"
+NB_LAST_MSG = 5
