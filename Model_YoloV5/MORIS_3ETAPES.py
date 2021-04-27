@@ -236,12 +236,14 @@ def new_predict(model, sample, vectorizer, selector):
 if __name__ == "__main__":
     cv_pdf = input('PDF :')
     pages = convert_from_path(cv_pdf, 500)
+    print(pages)
     for page in pages:
         image = page.save(cv_pdf[:-4] + '.jpg', 'JPEG')
 
-    image_path = glob.glob("*.jpg")[0]
+    print(glob.glob("*.jpg"))
+    #image_path = glob.glob("*.jpg")[0]
 
-    directory = detect(image_path)
+    directory = detect(image)
 
     for file in glob.glob(str(directory)+'/labels/*.txt'):
         labels = file
