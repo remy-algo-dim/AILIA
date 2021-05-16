@@ -18,7 +18,7 @@ import numpy as np
 
 """ Python script permettant de print les metrics du NER.
 cmd : python metrics_NER.py  ---> 2 inputs : "path jsonl labelisé via Doccano" & "path modele NER en question"
-							 ---> outputs : metrics printed sur le terminal
+                             ---> outputs : metrics printed sur le terminal
 """
 
 
@@ -144,7 +144,7 @@ def get_metrics(y_pred, y_true):
     coverage = np.round(len(y_true) / len(y_pred) * 100, 1)
     coverage = np.round(np.abs(100 - coverage), 1)
     print('*************************************************************************************')
-    print('				M  E  T  R  I  C  S 								')
+    print('             M  E  T  R  I  C  S                                 ')
     print('*************************************************************************************')
     print("Nombre de mots à prédire pour l'ensemble du test set : ", len(y_true))
     print("Nombre de mots prédits par le NER pour l'ensemble du test set : ", len(y_pred))
@@ -164,33 +164,34 @@ def get_metrics(y_pred, y_true):
 
 
 if __name__ == "__main__":
-	#/Users/remyadda/Downloads/cv_shani_exp_pro.jsonl
-	#/Users/remyadda/Desktop/AD/Projets/ALFRED/ALFRED_PROJECT/Model_NER_3
-	path_json_file = input("Enter le path du fichier JSONL labélisé : ")
-	output_dir = input("Entrer le path du NER modèle : ")
+    #/Users/remyadda/Downloads/cv_shani_exp_pro.jsonl
+    #/Users/remyadda/Desktop/AD/Projets/ALFRED/ALFRED_PROJECT/Model_NER_3
+    path_json_file = input("Enter le path du fichier JSONL labélisé : ")
+    output_dir = input("Entrer le path du NER modèle : ")
 
-	DATA = read_jsonl(path_json_file)
-	DATA = reformate_datas(DATA)
-	Xtest = X_test(DATA)
+    DATA = read_jsonl(path_json_file)
+    DATA = reformate_datas(DATA)
+    #On ne recupere que le texte
+    Xtest = X_test(DATA)
 
-	#On recupere les true tokens et label sous forme de listes
-	true_labels, true_corresponding_words = retrieve_trueLabelAndWord(DATA)
-	#On met le tout dans une liste de tuples
-	# Nbe de tuples a trouver
-	true_tuple = make_tuples(true_corresponding_words, true_labels)
+    #On recupere les true tokens et label sous forme de listes
+    true_labels, true_corresponding_words = retrieve_trueLabelAndWord(DATA)
+    #On met le tout dans une liste de tuples
+    # Nbe de tuples a trouver
+    true_tuple = make_tuples(true_corresponding_words, true_labels)
 
-	# Prédictions
-	preds = []
-	predicted_corresponding_word_list = []
-	for text in Xtest:
-	    predictions, predicted_corresponding_word = test_ner_model(output_dir, text)
-	    preds.extend(predictions)
-	    predicted_corresponding_word_list.extend(predicted_corresponding_word)
+    # Prédictions
+    preds = []
+    predicted_corresponding_word_list = []
+    for text in Xtest:
+        predictions, predicted_corresponding_word = test_ner_model(output_dir, text)
+        preds.extend(predictions)
+        predicted_corresponding_word_list.extend(predicted_corresponding_word)
 
-	# On met également les prédictions dans une liste de tuples
-	predicted_tuple = make_tuples(predicted_corresponding_word_list, preds)
+    # On met également les prédictions dans une liste de tuples
+    predicted_tuple = make_tuples(predicted_corresponding_word_list, preds)
 
-	#Metrics
-	get_metrics(predicted_tuple, true_tuple)
+    #Metrics
+    get_metrics(predicted_tuple, true_tuple)
 
 
